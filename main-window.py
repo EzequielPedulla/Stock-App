@@ -35,18 +35,59 @@ class MainWindow:
         frame.pack(expand=True, fill='both')
 
     def open_products_window(self):
+
         products_window = Toplevel(self.root)
         products_window.title('Productos')
         self.windows_styles(products_window, '800x600')
 
+        # Crear el Treeview
+        product_box = ttk.Treeview(products_window, columns=(
+            "Nombre", "Precio", "Stock"))
+        product_box.heading("#0", text="Nombre")
+        product_box.heading("#1", text="Precio")
+        product_box.heading("#2", text="Stock")
+        product_box.pack()
+
+        # etiquetas y campos de entrada para nombre, precio y stock
+
+        lbl_name = tk.Label(products_window, text='Nombre:')
+        lbl_name.pack()
+        entry_name = tk.Entry(products_window)
+        entry_name.pack()
+
+        lbl_price = tk.Label(products_window, text="Precio:")
+        lbl_price.pack()
+
+        entry_price = tk.Entry(products_window)
+        entry_price.pack()
+
+        lbl_stock = tk.Label(products_window, text="Stock:")
+        lbl_stock.pack()
+        entry_stock = tk.Entry(products_window)
+        entry_stock.pack()
+
+        def guardar_producto():
+            nombre = entry_name.get()
+            precio = entry_price.get()
+            stock = entry_stock.get()
+            product_box.insert("", "end", values=(nombre, precio, stock))
+            # Limpiar los campos de entrada
+            entry_name.delete(0, tk.END)
+            entry_price.delete(0, tk.END)
+            entry_stock.delete(0, tk.END)
+
+        btn_guardar = tk.Button(
+            products_window, text="Guardar", command=guardar_producto)
+        btn_guardar.pack()
+
     def open_sales_window(self):
         sales_window = Toplevel(self.root)
-        window_title = sales_window.title('Ventas')
+        sales_window.title('Ventas')
         self.windows_styles(sales_window, '800x600')
 
     def open_clients_window(self):
         clientes_window = Toplevel(self.root)
-        window_title = clientes_window.title('Clientes')
+        clientes_window.title('Clientes')
         self.windows_styles(clientes_window, '800x600')
 
 
