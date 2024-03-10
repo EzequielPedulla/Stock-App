@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import Menu
 from tkinter import Toplevel
 from tkinter import messagebox as alert
+from products.database import Database
 
 
 class ProductsWindow:
@@ -41,16 +42,21 @@ class ProductsWindow:
                     alert.showerror('Error', 'El codigo ya existe')
                     ProductsWindow(self.root)
 
-        def guardar_producto():
+        def save_product():
 
             codigo = entry_code.get()
             nombre = entry_name.get()
             precio = entry_price.get()
             stock = entry_stock.get()
+
             check_duplicate_barcode(self, codigo)
             self.products.append([codigo, nombre, precio, stock])
             self.product_box.insert("", "end", values=(
                 codigo, nombre, precio, stock))
+
+            # guardar en base de datos
+            database = Database()
+            database.insert_product(codigo, nombre, precio, stock)
             # Limpiar los campos de entrada
             entry_code.delete(0, tk.END)
             entry_stock.delete(0, tk.END)
@@ -86,5 +92,5 @@ class ProductsWindow:
         entry_stock.pack()
 
         btn_guardar = tk.Button(
-            self.products_window, text="Guardar", command=guardar_producto)
+            self.products_window, text="Guardar", command=save_product)
         btn_guardar.pack()
