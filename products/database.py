@@ -17,3 +17,13 @@ class Database:
         self.cur.execute("INSERT INTO productos VALUES (NULL, ?, ?, ?, ?)",
                          (codigo, nombre, precio, stock))
         self.conn.commit()
+
+    def clear_products(self):
+        # Elimina todos los registros de la tabla 'productos'
+        self.cur.execute("DELETE FROM productos")
+        self.conn.commit()
+
+    def get_all_products(self):
+        self.cur.execute("SELECT * FROM productos")
+        products = self.cur.fetchall()
+        return products

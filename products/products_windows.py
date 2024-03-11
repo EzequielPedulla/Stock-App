@@ -16,6 +16,26 @@ class ProductsWindow:
         self.windows_styles(self.products_window, '800x600')
         self.create_widgets()
 
+        self.load_products_from_database()
+
+        self.products_window.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
+        database = Database()
+        database.clear_products()
+        for product in self.products:
+            database.insert_product(
+                product[0], product[1], product[2], product[3])
+            self.products_window.destroy()
+
+    def load_products_from_database(self):
+        # Cargar productos desde la base de datos
+        database = Database()
+        products_from_db = database.get_all_products()
+        for product in products_from_db:
+            self.products.append(product)
+            self.product_box.insert("", "end", values=product)
+
     def windows_styles(self, window, geometry: str):
         window.geometry(geometry)
         window.configure(bg='#333')
@@ -35,6 +55,10 @@ class ProductsWindow:
         self.product_box.column("Precio", anchor="center")
         self.product_box.column("Stock", anchor="center")
         self.product_box.pack()
+
+        button_delete = tk.Button(
+            self.products_window, text='Eliminar',)
+        button_delete.pack()
 
         def check_duplicate_barcode(self, barcode):
             for product in self.products:

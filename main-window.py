@@ -10,7 +10,7 @@ from products.products_windows import ProductsWindow
 class MainWindow:
     def __init__(self, root):
         self.root = root
-        self.root.title('Productos')
+        self.root.title('Stock App')
         self.windows_styles(self.root, '800x600')
 
         self.menu_superior = Menu(self.root)
