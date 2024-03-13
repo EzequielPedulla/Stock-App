@@ -22,14 +22,16 @@ class ProductsWindow:
 
     def on_closing(self):
         database = Database()
-        database.clear_products()
+        database.clear_products()  # Limpiar todos los productos en la base de datos
         for product in self.products:
+            # Insertar productos restantes
             database.insert_product(
                 product[0], product[1], product[2], product[3])
-            self.products_window.destroy()
+        self.products_window.destroy()
 
     def load_products_from_database(self):
         # Cargar productos desde la base de datos
+        self.clear_products_list()
         database = Database()
         products_from_db = database.get_all_products()
         for product in products_from_db:
@@ -41,6 +43,27 @@ class ProductsWindow:
         window.configure(bg='#333')
         frame = tk.Frame(window, bg='#333')
         frame.pack(expand=True, fill='both')
+
+    def clear_products_list(self):
+        self.products = []
+        for item in self.product_box.get_children():
+            self.product_box.delete(item)
+
+    def delete_product(self):
+        selected_item = self.product_box.selection()
+        if selected_item:
+            item_values = self.product_box.item(selected_item)['values']
+            self.product_box.delete(selected_item)
+            database = Database()
+            # Suponiendo que el código del producto está en la primera posición
+            product_code = item_values[0]
+            database.delete_product(product_code)
+
+            self.products = [
+                product for product in self.products if product[0] != product_code]
+        else:
+            alert.showerror(
+                'Error', 'Por favor selecciona un producto para eliminar')
 
     def create_widgets(self):
         # Crear el Treeview
@@ -57,7 +80,7 @@ class ProductsWindow:
         self.product_box.pack()
 
         button_delete = tk.Button(
-            self.products_window, text='Eliminar',)
+            self.products_window, text='Eliminar', command=self.delete_product)
         button_delete.pack()
 
         def check_duplicate_barcode(self, barcode):

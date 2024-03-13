@@ -27,3 +27,8 @@ class Database:
         self.cur.execute("SELECT * FROM productos")
         products = self.cur.fetchall()
         return products
+
+    def delete_product(self, product_code):
+        self.cur.execute(
+            "DELETE FROM productos WHERE codigo = ?", (product_code,))
+        self.conn.commit()
