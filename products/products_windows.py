@@ -1,10 +1,11 @@
-import tkinter as tk
 from tkinter import *
-from tkinter import ttk
-from tkinter import Menu
-from tkinter import Toplevel
-from tkinter import messagebox as alert
 from products.database import Database
+from tkinter import messagebox as alert
+from tkinter import Toplevel
+from tkinter import Menu
+from tkinter import ttk
+import tkinter as tk
+import re
 
 
 class ProductsWindow:
@@ -51,19 +52,23 @@ class ProductsWindow:
 
     def delete_product(self):
         selected_item = self.product_box.selection()
-        if selected_item:
-            item_values = self.product_box.item(selected_item)['values']
-            self.product_box.delete(selected_item)
-            database = Database()
-            # Suponiendo que el código del producto está en la primera posición
-            product_code = item_values[0]
-            database.delete_product(product_code)
 
-            self.products = [
-                product for product in self.products if product[0] != product_code]
-        else:
-            alert.showerror(
-                'Error', 'Por favor selecciona un producto para eliminar')
+        try:
+            if selected_item:
+                item_values = self.product_box.item(selected_item)['values']
+                self.product_box.delete(selected_item)
+                database = Database()
+                # Suponiendo que el código del producto está en la primera posición
+                product_code = item_values[0]
+                database.delete_product(product_code)
+
+                self.products = [
+                    product for product in self.products if product[0] != product_code]
+            else:
+                alert.showerror(
+                    'Error', 'Por favor selecciona un producto para eliminar')
+        except:
+            pass
 
     def create_widgets(self):
         # Crear el Treeview
@@ -84,10 +89,21 @@ class ProductsWindow:
         button_delete.pack()
 
         def check_duplicate_barcode(self, barcode):
-            for product in self.products:
-                if product[0] == barcode:
-                    alert.showerror('Error', 'El codigo ya existe')
-                    ProductsWindow(self.root)
+            try:
+
+                for product in self.products:
+                    if product[0] == barcode:
+                        alert.showerror('Error', 'El codigo ya existe')
+            except:
+                pass
+
+        def validate_number(number):
+            # Verifica que stock sea un número entre 0 y 99999
+            if re.match("^[0-9]{1,5}$", number):
+                return int(number)
+            else:
+                alert.showerror(
+                    'Error', 'Por favor ingresa un stock válido (entre 0 y 99999)')
 
         def save_product():
 
@@ -96,20 +112,33 @@ class ProductsWindow:
             precio = entry_price.get()
             stock = entry_stock.get()
 
-            check_duplicate_barcode(self, codigo)
-            self.products.append([codigo, nombre, precio, stock])
-            self.product_box.insert("", "end", values=(
-                codigo, nombre, precio, stock))
+            if not codigo:
+                alert.showerror(
+                    'Error', 'El campo del código de barras no puede estar vacío')
+                return
+            try:
 
-            # guardar en base de datos
-            database = Database()
-            database.insert_product(codigo, nombre, precio, stock)
-            # Limpiar los campos de entrada
-            entry_code.delete(0, tk.END)
-            entry_stock.delete(0, tk.END)
-            entry_name.delete(0, tk.END)
-            entry_price.delete(0, tk.END)
-            entry_stock.delete(0, tk.END)
+                precio_validated = validate_number(entry_price.get())
+                stock_validated = validate_number(entry_stock.get())
+
+                if precio_validated is not None and stock_validated is not None:
+
+                    check_duplicate_barcode(self, codigo)
+
+                    self.products.append([codigo, nombre, precio, stock])
+                    self.product_box.insert("", "end", values=(
+                        codigo, nombre, precio, stock))
+
+                    # guardar en base de datos
+                    database = Database()
+                    database.insert_product(codigo, nombre, precio, stock)
+                    # Limpiar los campos de entrada
+                    entry_code.delete(0, tk.END)
+                    entry_stock.delete(0, tk.END)
+                    entry_name.delete(0, tk.END)
+                    entry_price.delete(0, tk.END)
+            except:
+                pass
 
         # etiquetas y campos de entrada para nombre, precio y stock
 
