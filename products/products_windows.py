@@ -14,7 +14,7 @@ class ProductsWindow:
         self.products = []
         self.products_window = Toplevel(self.root)
         self.products_window.title('Productos')
-        self.windows_styles(self.products_window, '800x600')
+        self.windows_styles(self.products_window, '1000x600')
         self.create_widgets()
 
         self.load_products_from_database()
@@ -58,7 +58,7 @@ class ProductsWindow:
                 item_values = self.product_box.item(selected_item)['values']
                 self.product_box.delete(selected_item)
                 database = Database()
-                # Suponiendo que el código del producto está en la primera posición
+
                 product_code = item_values[0]
                 database.delete_product(product_code)
 
@@ -71,7 +71,12 @@ class ProductsWindow:
             pass
 
     def create_widgets(self):
-        # Crear el Treeview
+        self.create_treeview()
+        self.create_delete_button()
+        self.create_entry_fields_save_button()
+
+    def create_treeview(self):
+
         self.product_box = ttk.Treeview(self.products_window, columns=(
             'Codigo', "Nombre", "Precio", "Stock"), show='headings')
         self.product_box.heading("Codigo", text="Codigo", anchor=CENTER)
@@ -84,89 +89,108 @@ class ProductsWindow:
         self.product_box.column("Stock", anchor="center")
         self.product_box.pack()
 
+    def create_delete_button(self):
         button_delete = tk.Button(
             self.products_window, text='Eliminar', command=self.delete_product)
         button_delete.pack()
 
-        def check_duplicate_barcode(self, barcode):
-            try:
+    def create_entry_fields_save_button(self):
+        self.create_entry_fields()
+        self.create_save_button()
 
-                for product in self.products:
-                    if product[0] == barcode:
-                        alert.showerror('Error', 'El codigo ya existe')
-            except:
-                pass
+    def create_entry_fields(self):
+        self.data_code = IntVar()
+        self.data_name = StringVar()
+        self.data_price = IntVar()
+        self.data_stock = IntVar()
 
-        def validate_number(number):
-            # Verifica que stock sea un número entre 0 y 99999
-            if re.match("^[0-9]{1,5}$", number):
-                return int(number)
-            else:
-                alert.showerror(
-                    'Error', 'Por favor ingresa un stock válido (entre 0 y 99999)')
+        self.create_code_entry()
+        self.create_price_entry()
+        self.create_name_entry()
+        self.create_stock_entry()
 
-        def save_product():
-
-            codigo = entry_code.get()
-            nombre = entry_name.get()
-            precio = entry_price.get()
-            stock = entry_stock.get()
-
-            if not codigo:
-                alert.showerror(
-                    'Error', 'El campo del código de barras no puede estar vacío')
-                return
-            try:
-
-                precio_validated = validate_number(entry_price.get())
-                stock_validated = validate_number(entry_stock.get())
-
-                if precio_validated is not None and stock_validated is not None:
-
-                    check_duplicate_barcode(self, codigo)
-
-                    self.products.append([codigo, nombre, precio, stock])
-                    self.product_box.insert("", "end", values=(
-                        codigo, nombre, precio, stock))
-
-                    # guardar en base de datos
-                    database = Database()
-                    database.insert_product(codigo, nombre, precio, stock)
-                    # Limpiar los campos de entrada
-                    entry_code.delete(0, tk.END)
-                    entry_stock.delete(0, tk.END)
-                    entry_name.delete(0, tk.END)
-                    entry_price.delete(0, tk.END)
-            except:
-                pass
-
-        # etiquetas y campos de entrada para nombre, precio y stock
-
-        data_code = IntVar()
-        data_name = StringVar()
-        data_price = IntVar()
-        data_stock = IntVar()
-
+    def create_code_entry(self):
         label_code = tk.Label(self.products_window, text="Codigo:")
         label_code.pack()
-        entry_code = tk.Entry(self.products_window, textvariable=data_code)
-        entry_code.pack()
+        self.entry_code = tk.Entry(
+            self.products_window, textvariable=self.data_code)
+        self.entry_code.pack()
 
+    def create_price_entry(self):
         label_price = tk.Label(self.products_window, text="Precio:")
         label_price.pack()
-        entry_price = tk.Entry(self.products_window, textvariable=data_price)
-        entry_price.pack()
+        self.entry_price = tk.Entry(
+            self.products_window, textvariable=self.data_price)
+        self.entry_price.pack()
 
+    def create_name_entry(self):
         label_name = tk.Label(self.products_window, text='Nombre:')
         label_name.pack()
-        entry_name = tk.Entry(self.products_window, textvariable=data_name)
-        entry_name.pack()
+        self.entry_name = tk.Entry(
+            self.products_window, textvariable=self.data_name)
+        self.entry_name.pack()
 
+    def create_stock_entry(self):
         label_stock = tk.Label(self.products_window, text="Stock:")
         label_stock.pack()
-        entry_stock = tk.Entry(self.products_window, textvariable=data_stock)
-        entry_stock.pack()
+        self.entry_stock = tk.Entry(
+            self.products_window, textvariable=self.data_stock)
+        self.entry_stock.pack()
 
+    def create_save_button(self):
         btn_guardar = tk.Button(
-            self.products_window, text="Guardar", command=save_product)
+            self.products_window, text="Guardar", command=self.save_product)
         btn_guardar.pack()
+
+    def check_duplicate_barcode(self, barcode):
+        try:
+
+            for product in self.products:
+                if product[0] == barcode:
+                    alert.showerror('Error', 'El codigo ya existe')
+        except:
+            pass
+
+    def validate_number(self, number):
+        # Verifica que stock sea un número entre 0 y 99999
+        if re.match("^[0-9]{1,5}$", number):
+            return int(number)
+        else:
+            alert.showerror(
+                'Error', 'Por favor ingresa un stock válido (entre 0 y 99999)')
+            return None
+
+    def save_product(self):
+        codigo = self.entry_code.get()
+        nombre = self.entry_name.get()
+        precio = self.entry_price.get()
+        stock = self.entry_stock.get()
+
+        if not codigo:
+            alert.showerror(
+                'Error', 'El campo del código de barras no puede estar vacío')
+            return
+
+        try:
+            precio_validated = self.validate_number(precio)
+            stock_validated = self.validate_number(stock)
+
+            if precio_validated is not None and stock_validated is not None:
+                self.check_duplicate_barcode(codigo)
+
+                self.products.append([codigo, nombre, precio, stock])
+                self.product_box.insert("", "end", values=(
+                    codigo, nombre, precio, stock))
+
+                database = Database()
+                database.insert_product(codigo, nombre, precio, stock)
+
+                self.clear_entry_fields()
+        except:
+            pass
+
+    def clear_entry_fields(self):
+        self.entry_code.delete(0, tk.END)
+        self.entry_stock.delete(0, tk.END)
+        self.entry_name.delete(0, tk.END)
+        self.entry_price.delete(0, tk.END)
